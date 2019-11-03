@@ -2,6 +2,8 @@ package edu.smith.cs.csc212.lists;
 
 import me.jjfoley.adt.ArrayWrapper;
 import me.jjfoley.adt.ListADT;
+import me.jjfoley.adt.errors.BadIndexError;
+import me.jjfoley.adt.errors.EmptyListError;
 import me.jjfoley.adt.errors.RanOutOfSpaceError;
 import me.jjfoley.adt.errors.TODOErr;
 
@@ -43,6 +45,9 @@ public class FixedSizeList<T> extends ListADT<T> {
 	@Override
 	public void setIndex(int index, T value) {
 		checkNotEmpty();
+		if(index<0) {
+			throw new BadIndexError(index);
+		}
 		this.checkExclusiveIndex(index);
 		this.array.setIndex(index, value);
 	}
@@ -50,24 +55,43 @@ public class FixedSizeList<T> extends ListADT<T> {
 	@Override
 	public T getIndex(int index) {
 		checkNotEmpty();
+		if(index<0) {
+			throw new BadIndexError(index);
+		}
 		this.checkExclusiveIndex(index);
 		return this.array.getIndex(index);
 	}
 
 	@Override
 	public T getFront() {
-		throw new TODOErr();
+		if(fill==0) {
+			throw new EmptyListError();
+		}
+		return this.array.getIndex(0);
 	}
 
 	@Override
 	public T getBack() {
-		throw new TODOErr();
+		if(fill==0) {
+			throw new EmptyListError();
+		}
+		return this.array.getIndex(fill-1);
 	}
 
 	@Override
 	public void addIndex(int index, T value) {
+		if(index<0) {
+			throw new BadIndexError(index);
+		}
 		// slide to the right
-		throw new TODOErr();
+		if(fill+1>array.size()) {
+			throw new RanOutOfSpaceError();
+		}
+		for(int i = fill-1; i>=index;i--) {
+			this.array.setIndex(i+1,array.getIndex(i));
+		}
+		this.array.setIndex(index, value);
+		fill++;
 	}
 
 	@Override
@@ -86,13 +110,36 @@ public class FixedSizeList<T> extends ListADT<T> {
 
 	@Override
 	public T removeIndex(int index) {
-		// slide to the left
-		throw new TODOErr();
+		
+		checkNotEmpty();
+		if(index<0) {
+			throw new BadIndexError(index);
+		}
+		
+		//store removed item
+		T removed = this.getIndex(index);
+		fill --;
+		
+		//slide everything left
+		for(int i = index; i<fill; i++) {
+			this.array.setIndex(i,array.getIndex(i+1));
+		}
+		//erase the duplicated item
+		this.array.setIndex(fill, null);
+		
+		//return deleted item
+		return removed;
+		
 	}
 
 	@Override
 	public T removeBack() {
-		throw new TODOErr();
+		checkNotEmpty();
+		T removed = this.array.getIndex(fill-1);
+		this.array.setIndex(fill-1,null);
+		fill--;
+		return removed;
+		
 	}
 
 	@Override

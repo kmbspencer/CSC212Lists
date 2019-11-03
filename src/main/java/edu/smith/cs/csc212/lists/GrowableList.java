@@ -2,6 +2,8 @@ package edu.smith.cs.csc212.lists;
 
 import me.jjfoley.adt.ArrayWrapper;
 import me.jjfoley.adt.ListADT;
+import me.jjfoley.adt.errors.BadIndexError;
+import me.jjfoley.adt.errors.RanOutOfSpaceError;
 import me.jjfoley.adt.errors.TODOErr;
 
 /**
@@ -19,6 +21,10 @@ public class GrowableList<T> extends ListADT<T> {
 	 * This is not private for use in tests.
 	 */
 	static final int START_SIZE = 10;
+	/**
+	 * This tells the list how many times more spots to add to the list
+	 */
+	static final int RESIZE_FACTOR = 2;
 	/**
 	 * This is the current array held by the GrowableList. It may be replaced.
 	 */
@@ -50,8 +56,24 @@ public class GrowableList<T> extends ListADT<T> {
 
 	@Override
 	public T removeIndex(int index) {
-		// slide to the left
-		throw new TODOErr();
+		
+		checkNotEmpty();
+		if(index<0) {
+			throw new BadIndexError(index);
+		}
+		//store removed item
+		T removed = this.getIndex(index);
+		fill --;
+		
+		//slide everything left
+		for(int i = index; i<fill; i++) {
+			this.array.setIndex(i,array.getIndex(i+1));
+		}
+		//erase the duplicated item
+		this.array.setIndex(fill, null);
+		
+		//return deleted item
+		return removed;
 	}
 
 	@Override
@@ -71,14 +93,26 @@ public class GrowableList<T> extends ListADT<T> {
 	 * This private method is called when we need to make room in our GrowableList.
 	 */
 	private void resizeArray() {
-		// TODO: use this where necessary (already called in addBack!)
-		throw new TODOErr();
+		//makes a new array with 2 x the spots
+		ArrayWrapper<T> temp = this.array;
+		this.array = new ArrayWrapper<>(this.fill*RESIZE_FACTOR);
+		for(int i = 0; i<temp.size();i++) {
+			this.array.setIndex(i,temp.getIndex(i));
+		}
+		
 	}
 
 	@Override
 	public void addIndex(int index, T item) {
-		// slide to the right
-		throw new TODOErr();
+		this.checkInclusiveIndex(index);
+		if(fill+1>array.size()) {
+			this.resizeArray();
+		}
+		for(int i = fill-1; i>=index;i--) {
+			this.array.setIndex(i+1,array.getIndex(i));
+		}
+		this.array.setIndex(index, item);
+		fill++;
 	}
 
 	@Override
@@ -95,7 +129,8 @@ public class GrowableList<T> extends ListADT<T> {
 
 	@Override
 	public T getIndex(int index) {
-		checkNotEmpty();
+		checkNotEmpty();		
+		this.checkExclusiveIndex(index);
 		checkExclusiveIndex(index);
 		return this.array.getIndex(index);
 	}
@@ -112,7 +147,10 @@ public class GrowableList<T> extends ListADT<T> {
 
 	@Override
 	public void setIndex(int index, T value) {
-		checkNotEmpty();
+		this.checkExclusiveIndex(index);
+		if(index<0) {
+			throw new BadIndexError(index);
+		}
 		checkExclusiveIndex(index);
 		this.array.setIndex(index, value);
 	}
