@@ -65,6 +65,7 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 		}
 		T deleted;
 		int start = 0;
+		int chunkIndex =0;
 		for (FixedSizeList<T> chunk : this.chunks) {
 			// calculate bounds of this chunk.
 			int end = start + chunk.size();
@@ -72,11 +73,15 @@ public class ChunkyArrayList<T> extends ListADT<T> {
 			// Check whether the index should be in this chunk:
 			if (start <= index && index < end) {
 				deleted =  chunk.removeIndex(index - start);
+				if (chunk.size() == 0) {
+					chunks.removeIndex(chunkIndex);
+				}
 				return deleted;
 			}
 			
 			// update bounds of next chunk.
 			start = end;
+			chunkIndex ++;
 		}
 		throw new BadIndexError(index);
 	}

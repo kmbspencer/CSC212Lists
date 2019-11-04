@@ -50,12 +50,16 @@ public class SinglyLinkedList<T> extends ListADT<T> {
 		checkNotEmpty();
 		int at = 0;
 		//while
+		if(index==0) {
+			return removeFront();
+		}
 		for (Node<T> n = this.start; n != null; n = n.next) {
-			if (at++ == index) {
-				Node <T> temp = n;
-				n = n.next;
+			if (at+1 == index) {
+				Node <T> temp = n.next;
+				n.next = n.next.next;
 				return temp.value;
 			}
+			at++;
 		}
 		throw new BadIndexError(index);
 	}
@@ -88,17 +92,15 @@ public class SinglyLinkedList<T> extends ListADT<T> {
 			start = new Node <T>(item, start);
 			return;
 		}
-		//Node<T> n = this.start;
-		//while(n!= null) {
-			
-			
+		
+				
 		for (Node<T> n = this.start; n != null; n = n.next) {
-			if (at++ == index) {
+			if (at+1 == index) {
 				Node<T> temp = n.next;
 				n.next = new Node<T>(item, temp);
 				return;
 			}
-			n = n.next;
+			at++;
 		}
 		throw new BadIndexError(index);
 	}

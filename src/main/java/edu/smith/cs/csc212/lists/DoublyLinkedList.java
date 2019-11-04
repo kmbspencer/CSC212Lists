@@ -64,16 +64,27 @@ public class DoublyLinkedList<T> extends ListADT<T> {
 	public T removeIndex(int index) {
 		checkNotEmpty();
 		Node<T> n = start;
-		Node<T> temp;
 		int at = 0;
 		while(n!= null) {
 			if(at++ == index) {
-				temp = n;
-				n.after = n.after.after;
-				n.after.before = n;
-				return temp.value;
+				Node<T> left = n.before;
+				Node<T> right = n.after;
+				if(right == null) {
+					end = left;
+				} else {
+					right.before = left;
+				}
+				
+				if(left ==null) {
+					start = right;
+				}else {
+					left.after = right;
+				}
+				
+				return n.value;
 			}
-		
+			n = n.after;
+	
 		}
 		throw new BadIndexError(index);
 		
@@ -87,11 +98,10 @@ public class DoublyLinkedList<T> extends ListADT<T> {
 			return;
 		}
 		Node<T> second = start;
-		second.after = start.after;
 		start= new Node<T>(item);
 		start.before = null;
 		start.after = second;
-		
+		second.before = start;
 	}
 
 	@Override
@@ -108,7 +118,6 @@ public class DoublyLinkedList<T> extends ListADT<T> {
 
 	@Override
 	public void addIndex(int index, T item) {
-		checkNotEmpty();
 		int at =0;
 		Node<T> n = start;
 		Node<T> add = new Node<T>(item);
@@ -117,15 +126,20 @@ public class DoublyLinkedList<T> extends ListADT<T> {
 			addFront(item);
 			return;
 		}
-		while(n.after != null) {
+		while(n != null) {
 			if(at++ == index) {
-				n.after.before = add;
-				add.after = n.after;
-				add.before =n;
-				n.after = add;				
+				Node<T> sleft = n.before;
+				add.before =sleft;
+				n.before = add;
+				add.after =n;
+				sleft.after = add;				
 				return;
 			}
 			n = n.after;
+		}
+		if (at == index) {
+			addBack(item);
+			return;
 		}
 		throw new BadIndexError(index);
 	}
@@ -216,6 +230,10 @@ public class DoublyLinkedList<T> extends ListADT<T> {
 			this.value = value;
 			this.before = null;
 			this.after = null;
+		}
+		
+		public String toString() {
+			return "Node("+value+")";
 		}
 	}
 }
